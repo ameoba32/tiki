@@ -9,7 +9,7 @@
 		{$captchaclass = 'col-md-5 col-sm-7 col-md-offset-4 col-sm-offset-3'}
 	{/if}
 	<div class="form-group">
-		{if $captchalib->type eq 'recaptcha'}
+		{if $captchalib->type eq 'recaptcha' || $captchalib->type eq 'recaptcha20'}
 			<div class="form-group">
 				<div class="{$captchaclass}">
 					{$captchalib->render()}

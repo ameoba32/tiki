@@ -46,7 +46,11 @@ class Captcha
 
 		if (empty($type)) {
 			if ($prefs['recaptcha_enabled'] == 'y' && !empty($prefs['recaptcha_privkey']) && !empty($prefs['recaptcha_pubkey'])) {
-				$type = 'recaptcha';
+				if ($prefs['recaptcha_version'] == '2') {
+					$type = 'recaptcha20';
+				} else {
+					$type = 'recaptcha';
+				}
 			} else if ($prefs['captcha_questions_active'] == 'y' && !empty($prefs['captcha_questions'])) {
 				$type = 'questions';
 			} else if (extension_loaded('gd') && function_exists('imagepng') && function_exists('imageftbbox')) {
@@ -67,7 +71,24 @@ class Captcha
 
 			$this->captcha->setOption('ssl', true);
 
-			$this->type = 'recaptcha';
+			$this->type = $type;
+
+			$this->recaptchaCustomTranslations();
+		} else if ($type === 'recaptcha20') {
+
+			include_once('lib/captcha/Captcha_ReCaptcha20.php');
+
+			$this->captcha = new Captcha_ReCaptcha20(
+				array(
+					'privkey' => $prefs['recaptcha_privkey'],
+					'pubkey' => $prefs['recaptcha_pubkey'],
+					'theme' => isset($prefs['recaptcha_theme']) ? $prefs['recaptcha_theme'] : 'clean',
+				)
+			);
+
+			$this->captcha->setOption('ssl', true);
+
+			$this->type = $type;
 
 			$this->recaptchaCustomTranslations();
 		} else if ($type === 'default') {
@@ -183,9 +204,17 @@ Recaptcha.create("' . $this->captcha->getPubKey() . '",
 					'recaptcha_response_field' => $input['recaptcha_response_field']
 				)
 			);
-		} else {
+		} if ($this->type == 'recaptcha20') {
+			return $this->captcha->isValid(
+				array(
+					'g-recaptcha-response' => $input['g-recaptcha-response'],
+				)
+			);
+		}	else {
 			return $this->captcha->isValid($input['captcha']);
 		}
+
+
 	}
 
 	/**
@@ -211,7 +240,7 @@ Recaptcha.create("' . $this->captcha->getPubKey() . '",
 			'badCaptcha' => tra('You have mistyped the anti-bot verification code. Please try again.')
 		);
 
-		if ($this->type == 'recaptcha')
+		if ($this->type == 'recaptcha' || $this->type == 'recaptcha20')
 			$errors['errCaptcha'] = tra('Failed to validate captcha');
 		else
 			$errors['missingID'] = tra('Captcha ID field is missing');
