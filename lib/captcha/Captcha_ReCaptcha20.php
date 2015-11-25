@@ -70,7 +70,6 @@ class Captcha_ReCaptcha20 extends Zend_Captcha_ReCaptcha
      */
     public function render(Zend_View_Interface $view = null, $element = null)
     {
-        TikiLib::lib('header')->add_jsfile_cdn('https://www.google.com/recaptcha/api.js');
         return '<div class="g-recaptcha" data-sitekey="' . $this->getPubkey() . '"></div>';
     }
 
