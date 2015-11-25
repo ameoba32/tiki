@@ -247,7 +247,7 @@ if ($prefs['feature_wysiwyg'] == 'y') {
 if ($prefs['feature_antibot'] == 'y' && empty($user)) {
 	if ($prefs['recaptcha_enabled'] === 'y') {
 		if ($prefs['recaptcha_version'] == '2') {
-			$headerlib->add_jsfile_cdn("$url_scheme://www.google.com/recaptcha/api.js");
+			$headerlib->add_jsfile_cdn("$url_scheme://www.google.com/recaptcha/api.js?hl=" . $prefs['site_language']);
 		} else {
 			$headerlib->add_jsfile_cdn("$url_scheme://www.google.com/recaptcha/api/js/recaptcha_ajax.js");
 		}
