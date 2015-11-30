@@ -10,7 +10,7 @@
 	{/if}
 	<div class="form-group">
 		{if $captchalib->type eq 'recaptcha' || $captchalib->type eq 'recaptcha20'}
-			<div class="form-group">
+			<div class="form-group clearfix">
 				<div class="{$captchaclass}">
 					{$captchalib->render()}
 				</div>

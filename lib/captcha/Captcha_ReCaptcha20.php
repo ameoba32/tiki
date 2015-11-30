@@ -28,6 +28,11 @@ class Captcha_ReCaptcha20 extends Zend_Captcha_ReCaptcha
             return false;
         }
 
+        // Google request was cached
+        if (in_array($value[$this->_RESPONSE], $_SESSION['recaptcha_cache'])) {
+            return true;
+        }
+
         //set POST variables
         $url = 'https://www.google.com/recaptcha/api/siteverify';
         $fields = array(
@@ -37,8 +42,8 @@ class Captcha_ReCaptcha20 extends Zend_Captcha_ReCaptcha
         );
 
         $fields_string = '';
-        foreach ($fields as $key => $value) {
-            $fields_string .= $key . '=' . $value . '&';
+        foreach ($fields as $k => $v) {
+            $fields_string .= $k . '=' . $v . '&';
         }
         rtrim($fields_string, '&');
         $ch = curl_init();
@@ -58,6 +63,9 @@ class Captcha_ReCaptcha20 extends Zend_Captcha_ReCaptcha
             return false;
         }
 
+        // Cache google respnonse to avoid second resubmission on ajax form
+        $_SESSION['recaptcha_cache'][] = $value[$this->_RESPONSE];
+
         return true;
     }
 
@@ -71,6 +79,22 @@ class Captcha_ReCaptcha20 extends Zend_Captcha_ReCaptcha
     public function render(Zend_View_Interface $view = null, $element = null)
     {
         return '<div class="g-recaptcha" data-sitekey="' . $this->getPubkey() . '"></div>';
+    }
+
+    /**
+     * Render captcha though Ajax
+     *
+     * @return string
+     */
+    public function renderAjax()
+    {
+        static $id = 1;
+        TikiLib::lib('header')->add_js("
+				grecaptcha.render('g-recaptcha{$id}', {
+				'sitekey': '{$this->getPubkey()}'
+				});
+				", 100);
+        return '<div id="g-recaptcha'.$id.'"></div>';
     }
 
 }
